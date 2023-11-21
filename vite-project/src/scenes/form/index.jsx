@@ -1,45 +1,62 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Box, Button, TextField } from '@mui/material'
 import { Formik } from 'formik'
 import * as yup from 'yup'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { Header } from '../../componets/header'
+import axios from 'axios'
+import { BaseUrl } from '../../Url'
+import { SectionContext } from '../../Context/Context'
 
 
 const initialValues = {
     firstName: '',
     lastName: '',
-    email: '',
-    contact: '',
-    address1 : '',
-    address2 : '',
+    UserName: '',
+    password:'',
 };
 
-const phoneRegExp = 
-/^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2-3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
+
 
 const userSchema = yup.object().shape({
     firstName : yup.string().required("required"),
     lastName : yup.string().required("required"),
-    email : yup.
-    string()
-    .email("Invalid email")
-    .required("required"),
-    contact : yup
-    .string()
-    .matches(phoneRegExp,"Phone number is not valid")
-    .required("required"),
-    address1 : yup.string().required("required"),
-    address2 : yup.string().required("required"),
+    UserName : yup.string().required("required"),
+    password: yup.string()
+    .min(4, 'Password is too short - should be 4 chars minimum.')
+    .max(8, 'Password is too long - should be 8 chars maximum')
 })
 
 
 const Form = () => {
+    const {token} = useContext(SectionContext)
     const isNonMobile = useMediaQuery("(min-width:600px)")
 
 
+
+  
+
+
     const handleFormSubmit = (values) => {
-        console.log(values);
+        const info = {
+            first_name: values.firstName,
+            last_name : values.lastName,
+            username : values.UserName,
+            password : values.password
+        }
+
+    axios.post(`${BaseUrl}/admin/add`,info,{
+        headers:{
+            Authorization:`${token}`
+        }
+    }).then(res => {
+        if(res.status ==  201 || res.status === 200){
+            alert("Success")
+        }else {
+            alert('error')
+        }
+    })
+
     }
 
   return (
@@ -52,7 +69,7 @@ const Form = () => {
         initialValues={initialValues}
         validationSchema={userSchema}
         >
-            {({ values, errors, touched,handleBlur, handleChange, handleSubmit  }) => (
+            {({ values, errors, touched, handleBlur, handleChange, handleSubmit  }) => (
                 <form onSubmit={handleSubmit}>
                     <Box 
                     display='grid' 
@@ -94,61 +111,35 @@ const Form = () => {
                         fullWidth
                         variant='filled'
                         type='text'
-                        label='Email'
+                        label='UserName'
                         onBlur={handleBlur}
                         onChange={handleChange}
                         value={values.email}
-                        name='email'
-                        error={ !!touched.email && !!errors.email }
-                        helperText={touched.email && errors.email}
-                        sx={{ gridColumn:"span 4" }}
+                        name='UserName'
+                        error={ !!touched.UserName && !!errors.UserName }
+                        helperText={touched.UserName && errors.UserName}
+                        sx={{ gridColumn:"span 2" }}
                         />
 
                     <TextField 
                         fullWidth
                         variant='filled'
                         type='text'
-                        label='Contact Nubmers'
+                        label='Password'
                         onBlur={handleBlur}
                         onChange={handleChange}
-                        value={values.contact}
-                        name='contact'
-                        error={ !!touched.contact && !!errors.contact }
-                        helperText={touched.contact && errors.contact}
-                        sx={{ gridColumn:"span 4" }}
+                        value={values.password}
+                        name='password'
+                        error={ !!touched.password && !!errors.password }
+                        helperText={touched.password && errors.password}
+                        sx={{ gridColumn:"span 2" }}
                         />
 
-                    <TextField 
-                        fullWidth
-                        variant='filled'
-                        type='text'
-                        label='Address 1'
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.address1}
-                        name='address1'
-                        error={ !!touched.address1 && !!errors.address1 }
-                        helperText={touched.address1 && errors.address1}
-                        sx={{ gridColumn:"span 4" }}
-                        />
-
-                    <TextField 
-                        fullWidth
-                        variant='filled'
-                        type='text'
-                        label='Address 2'
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.address2}
-                        name='address2'
-                        error={ !!touched.address2 && !!errors.address2 }
-                        helperText={touched.address2 && errors.address2}
-                        sx={{ gridColumn:"span 4" }}
-                        />
+                   
                     </Box>
                     <Box
                     display='flex'
-                    justifyContent='end'
+                    justifyContent='center'
                     mt='20px'
                     >
                         <Button type='submit' color='secondary' variant='contained'>
